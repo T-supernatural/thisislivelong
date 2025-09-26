@@ -1,14 +1,16 @@
+import { Link } from "react-router-dom";
+
 export default function Footer() {
   return (
     <footer className="bg-white text-gray-700 px-6 md:px-20 py-6">
       <div className="flex flex-col md:flex-row items-center justify-between gap-6">
         {/* Logo */}
-        <a href="/" className="flex items-center gap-2">
+        <Link to={"/admin"} className="flex items-center gap-2">
             <img src="/logo-new.png" alt="ThisIsLiveLong logo" className="h-16" />
             <p className="text-3xl md:text-4xl nanum-pen-script-regular">
               ThisIsLiveLong.
             </p>
-          </a>
+          </Link>
 
         {/* Copyright */}
         <div className="text-sm text-center md:text-left">
