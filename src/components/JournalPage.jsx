@@ -30,10 +30,8 @@ function JournalPage() {
 
   return (
     <div className="max-w-3xl mx-auto px-6 py-16">
-      <Link to="/" className="text-green-700 font-semibold hover:underline">
-        ← Back to Journal
-      </Link>
-      <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mt-6">
+      
+      <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mt-16">
         {article.title}
       </h1>
       <p className="text-sm text-gray-500 mt-2">

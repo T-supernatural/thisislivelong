@@ -135,59 +135,75 @@ function Showcase() {
       )}
 
       {/* Blog Section */}
+      {/* Blog Section */}
+<motion.div
+  id="journal"
+  initial="hidden"
+  whileInView="show"
+  viewport={{ once: true, amount: 0.2 }}
+  variants={stagger}
+>
+  <header className="mb-14 text-center">
+    <motion.h2
+      variants={fadeUp}
+      className="text-3xl md:text-4xl font-bold text-gray-900"
+    >
+      Journal
+    </motion.h2>
+    <motion.p
+      variants={fadeUp}
+      className="text-gray-600 mt-3 text-lg max-w-2xl mx-auto"
+    >
+      Thoughts, reflections, and lessons from the journey.
+    </motion.p>
+  </header>
+
+  <motion.div
+    className="grid grid-cols-1 md:grid-cols-3 gap-10"
+    variants={stagger}
+  >
+    {blogPosts.map((post) => (
       <motion.div
-        id="journal"
-        initial="hidden"
-        whileInView="show"
-        viewport={{ once: true, amount: 0.2 }}
-        variants={stagger}
+        key={post.id}
+        variants={fadeUp}
+        className="bg-white rounded-2xl shadow-md p-6 hover:shadow-2xl transition duration-300 hover:-translate-y-1"
       >
-        <header className="mb-14 text-center">
-          <motion.h2
-            variants={fadeUp}
-            className="text-3xl md:text-4xl font-bold text-gray-900"
-          >
-            Journal
-          </motion.h2>
-          <motion.p
-            variants={fadeUp}
-            className="text-gray-600 mt-3 text-lg max-w-2xl mx-auto"
-          >
-            Thoughts, reflections, and lessons from the journey.
-          </motion.p>
-        </header>
+        {post.image_url && (
+          <img
+            src={post.image_url}
+            alt={post.title}
+            className="w-full h-40 object-cover rounded-lg mb-4"
+          />
+        )}
+        <h3 className="text-xl font-semibold text-gray-900 mb-4">
+          {post.title}
+        </h3>
+        <p className="text-gray-700 leading-relaxed mb-6">
+          {post.excerpt}
+        </p>
 
-        <motion.div
-          className="grid grid-cols-1 md:grid-cols-3 gap-10"
-          variants={stagger}
+        {/* Read More */}
+        <Link
+          to={`/journal/${post.id}`}  // opens single article page
+          className="text-green-700 font-semibold hover:underline"
         >
-          {blogPosts.map((post) => (
-            <motion.div
-              key={post.id}
-              variants={fadeUp}
-              className="bg-white rounded-2xl shadow-md p-6 hover:shadow-2xl transition duration-300 hover:-translate-y-1"
-            >
-              {post.image_url && (
-                <img
-                  src={post.image_url}
-                  alt={post.title}
-                  className="w-full h-40 object-cover rounded-lg mb-4"
-                />
-              )}
-              <h3 className="text-xl font-semibold text-gray-900 mb-4">
-                {post.title}
-              </h3>
-              <p className="text-gray-700 leading-relaxed mb-6">
-                {post.excerpt}
-              </p>
-              <Link to={`/articles/${post.id}`} className="text-green-700 font-semibold hover:underline">
-  Read More →
-</Link>
-
-            </motion.div>
-          ))}
-        </motion.div>
+          Read More →
+        </Link>
       </motion.div>
+    ))}
+  </motion.div>
+
+  {/* View All Articles */}
+  <div className="text-center mt-10">
+    <Link
+      to="/journal" // new route to show all articles
+      className="text-green-700 font-semibold hover:underline text-lg"
+    >
+      View All Articles →
+    </Link>
+  </div>
+</motion.div>
+
     </section>
   );
 }

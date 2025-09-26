@@ -148,19 +148,19 @@ export default function Contact() {
           <div className="flex justify-center md:justify-start gap-6 text-2xl text-green-700">
             <a
               href="https://www.instagram.com/thisislivelong?igsh=MWNzNHNvbXBtZWZleQ=="
-              className="hover:text-blue-600 transition-colors"
+              className="hover:text-blue-600 transition-colors" title="Instagram"
             >
               <i className="fa-brands fa-instagram"></i>
             </a>
             <a
               href="https://youtube.com/@cosigatyou?si=7M8vBGAg7HcCt73A"
-              className="hover:text-red-600 transition-colors"
+              className="hover:text-red-600 transition-colors" title="Youtube"
             >
               <i className="fa-brands fa-youtube"></i>
             </a>
             <a
               href="https://medium.com/@robertnewman346"
-              className="hover:text-gray-900 transition-colors"
+              className="hover:text-gray-900 transition-colors" title="Medium"
             >
               <i className="fa-brands fa-medium"></i>
             </a>

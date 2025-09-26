@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 
 function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
@@ -45,12 +46,12 @@ function Navbar() {
       >
         <div className="flex justify-between items-center px-6 md:px-20 py-4">
           {/* Logo */}
-          <a href="#hero" className="flex items-center gap-2">
+          <Link to={"/home"} className="flex items-center gap-2">
             <img src="/logo-new.png" alt="ThisIsLiveLong logo" className="h-16" />
             <p className="text-3xl md:text-4xl nanum-pen-script-regular">
               ThisIsLiveLong.
             </p>
-          </a>
+          </Link>
 
           {/* Desktop Menu */}
           <div className="hidden md:flex gap-20 items-center">
@@ -72,7 +73,7 @@ function Navbar() {
               <li>
                 <a
                   href="https://www.instagram.com/thisislivelong?igsh=MWNzNHNvbXBtZWZleQ=="
-                  className="hover:text-green-600 focus:outline-none"
+                  className="hover:text-green-600 focus:outline-none" title="Instagram"
                 >
                   <i className="fa-brands fa-instagram"></i>
                 </a>
@@ -80,7 +81,7 @@ function Navbar() {
               <li>
                 <a
                   href="https://youtube.com/@cosigatyou?si=7M8vBGAg7HcCt73A"
-                  className="hover:text-green-600 focus:outline-none"
+                  className="hover:text-green-600 focus:outline-none" title="Youtube"
                 >
                   <i className="fa-brands fa-youtube"></i>
                 </a>
@@ -88,7 +89,7 @@ function Navbar() {
               <li>
                 <a
                   href="https://medium.com/@robertnewman346"
-                  className="hover:text-green-600 focus:outline-none"
+                  className="hover:text-green-600 focus:outline-none" title="Medium"
                 >
                   <i className="fa-brands fa-medium"></i>
                 </a>
@@ -156,19 +157,19 @@ function Navbar() {
           <div className="mt-auto flex gap-6 text-2xl">
             <a
               href="https://www.instagram.com/thisislivelong?igsh=MWNzNHNvbXBtZWZleQ=="
-              className="hover:text-green-600"
+              className="hover:text-green-600" title="Instagram"
             >
               <i className="fa-brands fa-instagram"></i>
             </a>
             <a
               href="https://youtube.com/@cosigatyou?si=7M8vBGAg7HcCt73A"
-              className="hover:text-green-600"
+              className="hover:text-green-600" title="Youtube"
             >
               <i className="fa-brands fa-youtube"></i>
             </a>
             <a
               href="https://medium.com/@robertnewman346"
-              className="hover:text-green-600"
+              className="hover:text-green-600" title="Medium"
             >
               <i className="fa-brands fa-medium"></i>
             </a>

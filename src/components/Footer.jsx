@@ -19,19 +19,19 @@ export default function Footer() {
         <div className="flex justify-center gap-6 text-2xl">
           <a
             href="https://www.instagram.com/thisislivelong?igsh=MWNzNHNvbXBtZWZleQ=="
-            className="hover:text-blue-600"
+            className="hover:text-blue-600" title="Instagram"
           >
             <i className="fa-brands fa-instagram"></i>
           </a>
           <a
             href="https://youtube.com/@cosigatyou?si=7M8vBGAg7HcCt73A"
-            className="hover:text-red-600"
+            className="hover:text-red-600" title="Youtube"
           >
             <i className="fa-brands fa-youtube"></i>
           </a>
           <a
             href="https://medium.com/@robertnewman346"
-            className="hover:text-gray-900"
+            className="hover:text-gray-900" title="Medium"
           >
             <i className="fa-brands fa-medium"></i>
           </a>
