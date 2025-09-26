@@ -1,33 +1,41 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
+import { supabase } from "../supabaseClient";
+import { Link } from "react-router-dom";
 
 function Showcase() {
   const [selectedImage, setSelectedImage] = useState(null);
+  const [portfolioItems, setPortfolioItems] = useState([]);
+  const [blogPosts, setBlogPosts] = useState([]);
 
-  const portfolioItems = [
-    { img: "https://via.placeholder.com/800x600", title: "Fish Farm Setup" },
-    { img: "https://via.placeholder.com/800x600", title: "Harvest Day" },
-    { img: "https://via.placeholder.com/800x600", title: "Journaling Moments" },
-    { img: "https://via.placeholder.com/800x600", title: "Community Training" },
-  ];
+  // Shuffle array helper
+  const shuffleArray = (array) => [...array].sort(() => Math.random() - 0.5);
 
-  const blogPosts = [
-    {
-      title: "Lessons from the Pond",
-      excerpt:
-        "Fishery is more than farming — it’s patience, vision, and resilience...",
-    },
-    {
-      title: "Why Journaling Matters",
-      excerpt:
-        "The best gospel to preach is yourself — here’s how journaling sharpens growth...",
-    },
-    {
-      title: "Faith in Entrepreneurship",
-      excerpt:
-        "Blending business with belief creates something far stronger than profit alone...",
-    },
-  ];
+  // Fetch showcase items
+  useEffect(() => {
+    const fetchShowcase = async () => {
+      const { data, error } = await supabase
+        .from("showcase")
+        .select("*")
+        .order("created_at", { ascending: false });
+
+      if (error) console.error("Error fetching showcase:", error);
+      else setPortfolioItems(shuffleArray(data).slice(0, 3));
+    };
+
+    const fetchArticles = async () => {
+      const { data, error } = await supabase
+        .from("journal")
+        .select("id, title, excerpt, image_url")
+        .order("created_at", { ascending: false });
+
+      if (error) console.error("Error fetching articles:", error);
+      else setBlogPosts(shuffleArray(data).slice(0, 3));
+    };
+
+    fetchShowcase();
+    fetchArticles();
+  }, []);
 
   // Animation Variants
   const fadeUp = {
@@ -70,15 +78,15 @@ function Showcase() {
           className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8"
           variants={stagger}
         >
-          {portfolioItems.map((item, i) => (
+          {portfolioItems.map((item) => (
             <motion.div
-              key={i}
+              key={item.id}
               variants={fadeUp}
               className="relative group rounded-2xl overflow-hidden shadow-lg cursor-pointer"
               onClick={() => setSelectedImage(item)}
             >
               <img
-                src={item.img}
+                src={item.image_url}
                 alt={item.title}
                 loading="lazy"
                 className="object-cover w-full h-64 group-hover:scale-110 transition-transform duration-700 ease-out"
@@ -91,6 +99,16 @@ function Showcase() {
             </motion.div>
           ))}
         </motion.div>
+
+        {/* See More */}
+        <div className="text-center mt-8">
+          <Link
+            to={"/showcase"}
+            className="text-green-700 font-semibold hover:underline text-lg" 
+          >
+            See More →
+          </Link>
+        </div>
       </motion.div>
 
       {/* Modal for Portfolio */}
@@ -104,7 +122,7 @@ function Showcase() {
               <i className="fa-solid fa-xmark"></i>
             </button>
             <img
-              src={selectedImage.img}
+              src={selectedImage.image_url}
               alt={selectedImage.title}
               className="w-full max-h-[80vh] object-contain rounded-xl shadow-2xl"
               loading="lazy"
@@ -143,21 +161,29 @@ function Showcase() {
           className="grid grid-cols-1 md:grid-cols-3 gap-10"
           variants={stagger}
         >
-          {blogPosts.map((post, i) => (
+          {blogPosts.map((post) => (
             <motion.div
-              key={i}
+              key={post.id}
               variants={fadeUp}
               className="bg-white rounded-2xl shadow-md p-6 hover:shadow-2xl transition duration-300 hover:-translate-y-1"
             >
+              {post.image_url && (
+                <img
+                  src={post.image_url}
+                  alt={post.title}
+                  className="w-full h-40 object-cover rounded-lg mb-4"
+                />
+              )}
               <h3 className="text-xl font-semibold text-gray-900 mb-4">
                 {post.title}
               </h3>
               <p className="text-gray-700 leading-relaxed mb-6">
                 {post.excerpt}
               </p>
-              <button className="text-green-700 font-semibold hover:underline">
-                Read More →
-              </button>
+              <Link to={`/articles/${post.id}`} className="text-green-700 font-semibold hover:underline">
+  Read More →
+</Link>
+
             </motion.div>
           ))}
         </motion.div>

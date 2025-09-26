@@ -1,5 +1,6 @@
 import { Typewriter } from "react-simple-typewriter";
 import { motion } from "framer-motion";
+import { Link } from "react-router-dom";
 
 export default function HeroSection() {
   return (
@@ -30,7 +31,7 @@ export default function HeroSection() {
           initial={{ opacity: 0, y: -30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 1, delay: 0.2 }}
-          className="text-4xl md:text-6xl mt-30 md:mt-5 font-extrabold text-gray-900 mb-6 leading-snug"
+          className="text-4xl md:text-6xl mt-30 md:mt-10 font-extrabold text-gray-900 mb-6 leading-snug"
         >
           <span className="block text-transparent bg-clip-text bg-gradient-to-r from-green-600 to-blue-600">
             <Typewriter
@@ -73,24 +74,23 @@ export default function HeroSection() {
           transition={{ duration: 1, delay: 1.5 }}
           className="flex flex-wrap gap-4 justify-center md:justify-start"
         >
-          <a
-            href="#services"
+          <Link to={"/services"}
             className="px-8 py-3 rounded-full bg-gradient-to-r from-green-600 to-blue-500 text-white font-semibold shadow-md hover:shadow-lg hover:shadow-green-400/50 hover:scale-105 transition duration-300"
           >
             Work With Me
-          </a>
-          <a
-            href="#about"
+          </Link>
+          <Link to={"/about"}
             className="px-8 py-3 rounded-full border-2 border-green-600 text-green-700 font-semibold hover:bg-green-600 hover:text-white hover:shadow-md transition duration-300"
           >
             Learn More
-          </a>
+          </Link>
         </motion.div>
       </div>
 
       {/* Right Column - Images Placeholder */}
-      <div>
-      </div>
+      {/* <div>
+        <img src="/me.png" alt="" />
+      </div> */}
     </section>
   );
 }

@@ -1,6 +1,16 @@
+import { useState } from "react";
 import { motion } from "framer-motion";
+import { supabase } from "../supabaseClient"; // make sure you created supabaseClient.js
 
 export default function Contact() {
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    message: "",
+  });
+  const [loading, setLoading] = useState(false);
+  const [status, setStatus] = useState("");
+
   // Animation Variants
   const fadeUp = {
     hidden: { opacity: 0, y: 40 },
@@ -10,6 +20,28 @@ export default function Contact() {
   const stagger = {
     hidden: {},
     show: { transition: { staggerChildren: 0.2 } },
+  };
+
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    setStatus("");
+
+    const { error } = await supabase.from("messages").insert([formData]);
+
+    if (error) {
+      console.error(error);
+      setStatus("❌ Failed to send message. Try again.");
+    } else {
+      setStatus("✅ Message sent successfully!");
+      setFormData({ name: "", email: "", message: "" }); // reset form
+    }
+
+    setLoading(false);
   };
 
   return (
@@ -36,6 +68,7 @@ export default function Contact() {
       >
         {/* Contact Form */}
         <motion.form
+          onSubmit={handleSubmit}
           variants={fadeUp}
           className="bg-white rounded-2xl shadow-lg p-8 space-y-6"
         >
@@ -43,7 +76,11 @@ export default function Contact() {
             <label className="block text-gray-700 font-medium mb-2">Name</label>
             <input
               type="text"
+              name="name"
+              value={formData.name}
+              onChange={handleChange}
               placeholder="Your Name"
+              required
               className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-green-500"
             />
           </div>
@@ -52,7 +89,11 @@ export default function Contact() {
             <label className="block text-gray-700 font-medium mb-2">Email</label>
             <input
               type="email"
+              name="email"
+              value={formData.email}
+              onChange={handleChange}
               placeholder="you@example.com"
+              required
               className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-green-500"
             />
           </div>
@@ -62,18 +103,25 @@ export default function Contact() {
               Message
             </label>
             <textarea
+              name="message"
+              value={formData.message}
+              onChange={handleChange}
               placeholder="Write your message..."
               rows="5"
+              required
               className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-green-500"
             ></textarea>
           </div>
 
           <button
             type="submit"
+            disabled={loading}
             className="w-full bg-gradient-to-r from-green-600 to-blue-500 text-white font-semibold py-3 rounded-lg shadow-md hover:scale-105 transition-transform duration-300"
           >
-            Send Message
+            {loading ? "Sending..." : "Send Message"}
           </button>
+
+          {status && <p className="text-center mt-2">{status}</p>}
         </motion.form>
 
         {/* Contact Info / Socials */}
