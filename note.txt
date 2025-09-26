@@ -1,0 +1,12 @@
+home page
+- navbar
+- herosection
+- about
+- what i do
+- showcase
+- journal
+- contact
+- footer
+
+django
+- 
