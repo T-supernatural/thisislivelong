@@ -1,5 +1,5 @@
-@import "tailwindcss";
-
+/* Tailwind should be added via a PostCSS-processed entry (e.g. use @tailwind directives
+   in a dedicated CSS file and import it from the app entry). For now, keep custom rules. */
 
 .nanum-pen-script-regular {
   font-family: "Nanum Pen Script", cursive;
