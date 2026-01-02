@@ -11,6 +11,14 @@ import Navbar from './components/Navbar'
 import Footer from './components/Footer'
 
 
+import { supabase } from "./supabaseClient";
+
+supabase.auth.getSession().then(({ data, error }) => {
+  console.log("session:", data);
+  console.log("error:", error);
+});
+
+
 function App() {
   
   return (
