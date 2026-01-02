@@ -5,15 +5,15 @@ import toast, { Toaster } from "react-hot-toast";
 
 export default function AdminPage() {
   const [session, setSession] = useState(null);
-  const [activeTab, setActiveTab] = useState("showcase"); // "showcase", "journal", "messages"
+  const [activeTab, setActiveTab] = useState("showcase");
 
-  // Showcase upload states
+  // Showcase
   const [title, setTitle] = useState("");
   const [file, setFile] = useState(null);
-  const fileInputRef = useRef(null);
   const [uploadingShowcase, setUploadingShowcase] = useState(false);
+  const fileInputRef = useRef(null);
 
-  // Journal upload states
+  // Journal
   const [journalTitle, setJournalTitle] = useState("");
   const [journalContent, setJournalContent] = useState("");
   const [savingJournal, setSavingJournal] = useState(false);
@@ -22,25 +22,24 @@ export default function AdminPage() {
   const [messages, setMessages] = useState([]);
   const [loadingMessages, setLoadingMessages] = useState(false);
 
+  // Check session on mount
   useEffect(() => {
-    // Get current session
     supabase.auth.getSession().then(({ data }) => setSession(data.session));
-
-    // Listen for auth changes
     const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session);
     });
-
     return () => listener.subscription.unsubscribe();
   }, []);
 
-  // Login via magic link
+  /** ADMIN AUTH FLOW **/
+
   const handleLogin = async (e) => {
     e.preventDefault();
     const email = e.target.email.value;
-    const { error } = await supabase.auth.signInWithOtp({ email });
-    if (error) toast.error("Login failed ❌");
-    else toast.success("Check your email for the login link ✉️");
+    const password = e.target.password?.value; // if using signInWithPassword
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+    if (error) return toast.error("Login failed ❌");
+    toast.success("Logged in ✅");
   };
 
   const handleLogout = async () => {
@@ -50,15 +49,15 @@ export default function AdminPage() {
     toast.success("Logged out ✅");
   };
 
-  // Showcase Upload
+  /** SHOWCASE FLOW **/
+
   const handleUploadShowcase = async (e) => {
     e.preventDefault();
-    if (!file || !title) return toast.error("Please select a file and enter a title");
+    if (!file || !title) return toast.error("Enter title & choose file");
 
     setUploadingShowcase(true);
     const fileName = `${uuidv4()}-${file.name}`;
-
-    const { error: uploadError } = await supabase.storage.from("upload").upload(fileName, file);
+    const { error: uploadError } = await supabase.storage.from("showcase-images").upload(fileName, file);
     if (uploadError) {
       setUploadingShowcase(false);
       return toast.error("Upload failed ❌");
@@ -67,66 +66,62 @@ export default function AdminPage() {
     const { data: urlData, error: urlError } = await supabase.storage.from("upload").getPublicUrl(fileName);
     if (urlError) {
       setUploadingShowcase(false);
-      return toast.error("Failed to get public URL ❌");
+      return toast.error("Failed to get URL ❌");
     }
 
     const { error: dbError } = await supabase.from("showcase").insert([{ title, image_url: urlData.publicUrl }]);
     setUploadingShowcase(false);
-    if (dbError) return toast.error("Database insert failed ❌");
+    if (dbError) return toast.error("DB insert failed ❌");
 
-    toast.success("Showcase item uploaded ✅");
+    toast.success("Showcase uploaded ✅");
     setTitle(""); setFile(null);
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
-  // Journal Upload
+  /** JOURNAL FLOW **/
+
   const handleAddJournal = async (e) => {
     e.preventDefault();
-    if (!journalTitle || !journalContent) return toast.error("Please enter both title and content");
+    if (!journalTitle || !journalContent) return toast.error("Enter title & content");
 
     setSavingJournal(true);
-    const excerpt = journalContent.slice(0, 100).split(" ").slice(0, -1).join(" ") + "...";
-
+    const excerpt = journalContent.slice(0, 100) + "...";
     const { error } = await supabase.from("journal").insert([{ title: journalTitle, content: journalContent, excerpt }]);
     setSavingJournal(false);
-    if (error) return toast.error("Failed to save journal ❌");
+    if (error) return toast.error("Failed ❌");
 
     toast.success("Journal saved ✅");
     setJournalTitle(""); setJournalContent("");
   };
 
-  // Messages
+  /** MESSAGES **/
+
   const handleFetchMessages = async () => {
     setLoadingMessages(true);
     const { data, error } = await supabase.from("messages").select("*").order("created_at", { ascending: false });
     setLoadingMessages(false);
-    if (error) return toast.error("Failed to fetch messages ❌");
+    if (error) return toast.error("Failed ❌");
     setMessages(data);
   };
 
   const handleDeleteMessage = async (id) => {
     const { error } = await supabase.from("messages").delete().eq("id", id);
-    if (error) return toast.error("Failed to delete message ❌");
+    if (error) return toast.error("Delete failed ❌");
     setMessages(messages.filter((msg) => msg.id !== id));
     toast.success("Message deleted ✅");
   };
 
+  /** RENDER **/
+
   if (!session) {
     return (
       <div className="h-screen flex items-center justify-center bg-gray-100">
-        <form onSubmit={handleLogin} className="bg-white shadow-lg rounded-xl p-8 space-y-6 w-80">
+        <form onSubmit={handleLogin} className="bg-white p-8 rounded-xl shadow-md space-y-4 w-80">
           <Toaster />
-          <h2 className="text-xl font-bold text-center text-gray-800">Admin Login</h2>
-          <input
-            type="email"
-            name="email"
-            placeholder="Enter your email"
-            className="w-full border px-4 py-2 rounded-md focus:ring-2 focus:ring-green-500"
-            required
-          />
-          <button type="submit" className="w-full bg-green-600 text-white py-2 rounded-md hover:bg-green-700">
-            Send Magic Link
-          </button>
+          <h2 className="text-xl font-bold text-center">Admin Login</h2>
+          <input type="email" name="email" placeholder="Email" className="w-full border px-4 py-2 rounded-md" required />
+          <input type="password" name="password" placeholder="Password" className="w-full border px-4 py-2 rounded-md" required />
+          <button type="submit" className="w-full bg-green-600 text-white py-2 rounded-md">Login</button>
         </form>
       </div>
     );
@@ -136,21 +131,17 @@ export default function AdminPage() {
     <div className="p-10 space-y-6">
       <Toaster />
       <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-bold mb-6">Admin Dashboard</h1>
-        <button onClick={handleLogout} className="bg-red-500 text-white py-2 px-4 rounded-md hover:bg-red-600">
-          Logout
-        </button>
+        <h1 className="text-3xl font-bold">Admin Dashboard</h1>
+        <button onClick={handleLogout} className="bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600">Logout</button>
       </div>
 
       {/* Tabs */}
       <div className="flex space-x-4 mb-6">
-        {["showcase", "journal", "messages"].map((tab) => (
+        {["showcase", "journal", "messages"].map(tab => (
           <button
             key={tab}
             onClick={() => setActiveTab(tab)}
-            className={`py-2 px-4 rounded-t-md font-semibold ${
-              activeTab === tab ? "bg-green-500 text-white" : "bg-gray-200 text-gray-700 hover:bg-gray-300"
-            }`}
+            className={`py-2 px-4 rounded-t-md font-semibold ${activeTab === tab ? "bg-green-500 text-white" : "bg-gray-200 text-gray-700 hover:bg-gray-300"}`}
           >
             {tab.charAt(0).toUpperCase() + tab.slice(1)}
           </button>
@@ -159,57 +150,39 @@ export default function AdminPage() {
 
       {/* Tab Contents */}
       {activeTab === "showcase" && (
-        <form onSubmit={handleUploadShowcase} className="bg-white shadow-md rounded-xl p-6 space-y-4">
-          <h2 className="text-xl font-semibold text-gray-800">Upload Showcase Image</h2>
-          <input
-            type="text"
-            placeholder="Enter image title"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            className="w-full border px-4 py-2 rounded-md"
-          />
-          <input type="file" ref={fileInputRef} accept="image/*" onChange={(e) => setFile(e.target.files[0])} className="w-full" />
-          <button type="submit" disabled={uploadingShowcase} className="w-full bg-blue-500 text-white py-2 rounded-md hover:bg-blue-600 disabled:opacity-50">
-            {uploadingShowcase ? "Uploading..." : "Upload"}
-          </button>
+        <form onSubmit={handleUploadShowcase} className="bg-white p-6 rounded-xl shadow-md space-y-4">
+          <h2 className="font-semibold text-xl">Upload Showcase</h2>
+          <input type="text" placeholder="Title" value={title} onChange={e => setTitle(e.target.value)} className="w-full border px-4 py-2 rounded-md" />
+          <input type="file" ref={fileInputRef} onChange={e => setFile(e.target.files[0])} className="w-full" />
+          <button type="submit" disabled={uploadingShowcase} className="w-full bg-blue-500 text-white py-2 rounded-md hover:bg-blue-600 disabled:opacity-50">{uploadingShowcase ? "Uploading..." : "Upload"}</button>
         </form>
       )}
 
       {activeTab === "journal" && (
-        <form onSubmit={handleAddJournal} className="bg-white shadow-md rounded-xl p-6 space-y-4">
-          <h2 className="text-xl font-semibold text-gray-800">Add Journal Article</h2>
-          <input type="text" placeholder="Article Title" value={journalTitle} onChange={(e) => setJournalTitle(e.target.value)} className="w-full border px-4 py-2 rounded-md" />
-          <textarea placeholder="Article Content" value={journalContent} onChange={(e) => setJournalContent(e.target.value)} rows="5" className="w-full border px-4 py-2 rounded-md"></textarea>
-          <button type="submit" disabled={savingJournal} className="w-full bg-purple-500 text-white py-2 rounded-md hover:bg-purple-600 disabled:opacity-50">
-            {savingJournal ? "Saving..." : "Save Article"}
-          </button>
+        <form onSubmit={handleAddJournal} className="bg-white p-6 rounded-xl shadow-md space-y-4">
+          <h2 className="font-semibold text-xl">Add Journal</h2>
+          <input type="text" placeholder="Title" value={journalTitle} onChange={e => setJournalTitle(e.target.value)} className="w-full border px-4 py-2 rounded-md" />
+          <textarea placeholder="Content" value={journalContent} onChange={e => setJournalContent(e.target.value)} className="w-full border px-4 py-2 rounded-md" rows={5}></textarea>
+          <button type="submit" disabled={savingJournal} className="w-full bg-purple-500 text-white py-2 rounded-md hover:bg-purple-600 disabled:opacity-50">{savingJournal ? "Saving..." : "Save"}</button>
         </form>
       )}
 
       {activeTab === "messages" && (
-        <div className="bg-white shadow-md rounded-xl p-6 space-y-4">
-          <h2 className="text-xl font-semibold text-gray-800">Messages</h2>
-          <button onClick={handleFetchMessages} disabled={loadingMessages} className="w-full bg-red-500 text-white py-2 rounded-md hover:bg-red-600 disabled:opacity-50">
-            {loadingMessages ? "Loading..." : "View Messages"}
-          </button>
-          <div className="mt-4 space-y-3">
-            {messages.length === 0 ? (
-              <p className="text-gray-600">No messages found.</p>
-            ) : (
-              messages.map((msg) => (
-                <div key={msg.id} className="border p-3 rounded-md bg-gray-50 shadow-sm flex justify-between items-start">
-                  <div>
-                    <p className="font-semibold">{msg.name}</p>
-                    <p className="text-sm text-gray-600">{msg.email}</p>
-                    <p className="mt-2">{msg.message}</p>
-                  </div>
-                  <button onClick={() => handleDeleteMessage(msg.id)} className="text-red-500 font-bold hover:underline ml-4">
-                    Delete
-                  </button>
+        <div className="bg-white p-6 rounded-xl shadow-md space-y-4">
+          <h2 className="font-semibold text-xl">Messages</h2>
+          <button onClick={handleFetchMessages} disabled={loadingMessages} className="w-full bg-red-500 text-white py-2 rounded-md hover:bg-red-600 disabled:opacity-50">{loadingMessages ? "Loading..." : "View Messages"}</button>
+          {messages.length === 0 ? <p className="text-gray-600 mt-2">No messages yet.</p> :
+            messages.map(msg => (
+              <div key={msg.id} className="border p-3 rounded-md flex justify-between bg-gray-50 shadow-sm mt-2">
+                <div>
+                  <p className="font-semibold">{msg.name}</p>
+                  <p className="text-sm text-gray-600">{msg.email}</p>
+                  <p className="mt-1">{msg.message}</p>
                 </div>
-              ))
-            )}
-          </div>
+                <button onClick={() => handleDeleteMessage(msg.id)} className="text-red-500 hover:underline ml-4">Delete</button>
+              </div>
+            ))
+          }
         </div>
       )}
     </div>
