@@ -1,0 +1,6 @@
+what next is:
+- admin logout button
+- how to access the admin dashboard
+- finalize "my works" and "journal" section
+- add whatsapp
+- hosting and deployment and seo

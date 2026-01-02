@@ -63,7 +63,7 @@ export default function AdminPage() {
       return toast.error("Upload failed ❌");
     }
 
-    const { data: urlData, error: urlError } = await supabase.storage.from("upload").getPublicUrl(fileName);
+    const { data: urlData, error: urlError } = await supabase.storage.from("showcase-images").getPublicUrl(fileName);
     if (urlError) {
       setUploadingShowcase(false);
       return toast.error("Failed to get URL ❌");
@@ -128,7 +128,7 @@ export default function AdminPage() {
   }
 
   return (
-    <div className="p-10 space-y-6">
+    <div className="pt-40 p-10 space-y-6">
       <Toaster />
       <div className="flex justify-between items-center">
         <h1 className="text-3xl font-bold">Admin Dashboard</h1>
