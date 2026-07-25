@@ -1,17 +1,12 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "../supabaseClient";
 import { v4 as uuidv4 } from "uuid";
 import toast, { Toaster } from "react-hot-toast";
 
-/** =========================
- * HARD-CODED ADMIN CREDENTIALS
- * ========================= */
-const ADMIN_EMAIL = "tinuademichael@gmail.com";
-const ADMIN_PASSWORD = "supersecret123"; // change this
-
 export default function AdminPage() {
   const [session, setSession] = useState(null);
+  const [loadingSession, setLoadingSession] = useState(true);
   const [activeTab, setActiveTab] = useState("showcase");
   const navigate = useNavigate();
 
@@ -30,27 +25,43 @@ export default function AdminPage() {
   const [messages, setMessages] = useState([]);
   const [loadingMessages, setLoadingMessages] = useState(false);
 
+  useEffect(() => {
+    // Get current session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+      setLoadingSession(false);
+    });
+
+    // Listen for auth state changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session);
+      setLoadingSession(false);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
   /** =========================
-   * LOGIN (FAKE AUTH)
+   * LOGIN (REAL SUPABASE AUTH)
    * ========================= */
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
 
     const email = e.target.email.value;
     const password = e.target.password.value;
 
-    if (email !== ADMIN_EMAIL || password !== ADMIN_PASSWORD) {
-      toast.error("Invalid credentials ❌");
-      navigate("/", { replace: true });
+    const { error } = await supabase.auth.signInWithPassword({ email, password });
+
+    if (error) {
+      toast.error(`Login failed: ${error.message} ❌`);
       return;
     }
 
-    setSession({ admin: true });
     toast.success("Welcome Admin ✅");
   };
 
-  const handleLogout = () => {
-    setSession(null);
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
     toast.success("Logged out ✅");
     navigate("/", { replace: true });
   };
@@ -82,7 +93,7 @@ export default function AdminPage() {
 
     const { error: dbError } = await supabase
       .from("showcase")
-      .insert([{ title, image_url: data.publicUrl }]);
+      .insert([{ title, image_url: data.publicUrl, file_path: fileName }]);
 
     setUploadingShowcase(false);
 
@@ -155,6 +166,14 @@ export default function AdminPage() {
   /** =========================
    * LOGIN SCREEN
    * ========================= */
+  if (loadingSession) {
+    return (
+      <div className="h-screen flex items-center justify-center bg-gray-100">
+        <p className="text-gray-600">Checking authorization...</p>
+      </div>
+    );
+  }
+
   if (!session) {
     return (
       <div className="h-screen flex items-center justify-center bg-gray-100">
